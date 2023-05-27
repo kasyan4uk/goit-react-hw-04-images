@@ -16,6 +16,7 @@ function Modal({ modalData, onModalClose }) {
     return () => {
       window.removeEventListener('keydown', handleCloseModal);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
     return createPortal(
