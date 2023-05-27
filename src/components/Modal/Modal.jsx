@@ -3,22 +3,20 @@ import { createPortal } from 'react-dom';
 import { useEffect } from 'react';
 import { Overlay, StyledModal } from './Modal.styled';
 
-const modalRoot = document.querySelector('#modal');
-
 function Modal({ modalData, onModalClose }) {
   const { largeImageURL, tags } = modalData;
   const handleCloseModal = e => {
     if (e.target === e.currentTarget || e.code === 'Escape') {
       onModalClose();
     }
-  }
+  };
 
   useEffect(() => {
-    window.addEventListener('keydown', this.handleCloseModal);
+    window.addEventListener('keydown', handleCloseModal);
     return () => {
-      window.removeEventListener('keydown', this.handleCloseModal);
+      window.removeEventListener('keydown', handleCloseModal);
     }
-},[])
+  }, []);
 
     return createPortal(
       <Overlay onClick={handleCloseModal}>
@@ -26,7 +24,7 @@ function Modal({ modalData, onModalClose }) {
           <img src={largeImageURL} alt={tags} />
         </StyledModal>
       </Overlay>,
-      modalRoot
+      document.querySelector('#modal')
     );
   
 }
