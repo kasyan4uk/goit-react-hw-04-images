@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect} from 'react';
 import { AppWrapper } from './App.styled';
 import fetchImages from '../utils/PixabayAPI';
 import Searchbar from './Searchbar';
@@ -7,65 +7,60 @@ import Button from './Button';
 import Loader from './Loader';
 import Modal from './Modal';
 
-export class App extends Component {
-  state = {
-    images: [],
-    value: '',
-    page: 1,
-    isLoading: false,
-    isModalOpen: false,
-    modalData: null,
+export function App() {
+  const [images, setImages] = useState([]);
+  const [value, setValue] = useState('');
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModaldata] = useState(null);
+
+
+
+  useEffect(() => {
+    if (value === '') return;
+    setIsLoading(true);
+    fetchImages(value, page)
+      .then(({ data }) => setImages( prevState => [...prevState, ...data.hits] ))
+      .catch(err => alert(err.message))
+      .finally(() => setIsLoading(false));
+  }, [page, value]);
+
+  const handleSearchbarSubmit = value => {
+    setPage(1);
+    setValue(value);
+    setImages([]);
   };
 
-  componentDidUpdate(_, prevState) {
-    const { value, page, images } = this.state;
-
-    if (page !== prevState.page || value !== prevState.value) {
-      this.setState({ isLoading: true });
-      fetchImages(value, page)
-        .then(({ data }) =>
-          this.setState({ images: [...images, ...data.hits] })
-        )
-        .catch(err => alert(err.message))
-        .finally(() => this.setState({ isLoading: false }));
-    }
-  }
-
-  handleSearchbarSubmit = value => {
-    this.setState({ value, page: 1, images: [] });
+  const changeModalData = modalData => {
+    setModaldata(modalData);
+    setIsModalOpen(true);
   };
 
-  setModalData = modalData => {
-    this.setState({ modalData, isModalOpen: true });
+  const changePage = () => {
+    setPage(prev => prev + 1);
   };
 
-  changePage = () => {
-    this.setState(prev => ({ page: prev.page + 1 }));
+  const handleModalClose = () => {
+    setIsModalOpen(false);
   };
 
-  handleModalClose = () => {
-    this.setState({ isModalOpen: false });
-  };
-
-  render() {
-    const { images, isLoading, modalData, isModalOpen } = this.state;
     return (
       <>
-        <Searchbar onFormSubmit={this.handleSearchbarSubmit} />
+        <Searchbar onFormSubmit={handleSearchbarSubmit} />
         <AppWrapper>
-          <ImageGallery images={images} onImageClick={this.setModalData} />
+          <ImageGallery images={images} onImageClick={changeModalData} />
         </AppWrapper>
         {isLoading ? (
           <Loader />
         ) : (
-          images.length > 0 && <Button onClick={this.changePage} />
+          images.length > 0 && <Button onClick={changePage} />
         )}
         {isModalOpen && (
-          <Modal modalData={modalData} onModalClose={this.handleModalClose} />
+          <Modal modalData={modalData} onModalClose={handleModalClose} />
         )}
       </>
     );
-  }
 }
 
 export default App;
